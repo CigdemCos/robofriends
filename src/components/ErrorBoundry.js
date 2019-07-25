@@ -1,23 +1,12 @@
-import React, {Component} from 'react';
+import React from 'react';
+import CardList from './CardList';
 
-class ErrorBoundry extends Component{
-	constructor(props){
-		super(props);
-		this.state={
-			hasError: false
-		}
-}//const
-
-	componentDidCatch(error, info){
-		this.setState({hasError:true})
-	}
-
-	render(){
-		if(this.state.hasError){
-			return <h1>Ooops. That is not good</h1>
-		}
-		return this.props.children
-	}
+	const ErrorBoundry = ({catchError, selectedRobots}) =>{
+	 if(catchError){
+		    return (<h1>Ooops. That is not good</h1>);
+		}else{
+	 		return (<CardList robots={selectedRobots} />);
+	 	}
 }
 
 export default ErrorBoundry;

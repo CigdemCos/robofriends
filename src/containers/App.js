@@ -1,59 +1,58 @@
 import React,{Component} from 'react';
-import CardList from '../components/CardList';
+import { connect } from 'react-redux';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
 import ErrorBoundry from '../components/ErrorBoundry';
 import './App.css';
 
+import { setSearchField, requestRobots } from '../actions';
+const mapStateToProps = state =>{
+   return{
+      searchField: state.searchRobots.searchField,
+      robots: state.requestRobots.robots,
+      isPending: state.requestRobots.isPending,
+      error: state.requestRobots.error
+   }
+}
+
+//dispatch (about flux) is what triggers the action, so an action is just an object
+//In order to send this action we need smt called dispatch. so it gets dispatched into the reducer.
+//So this dispatch can now be used to send actions, so the reducers are aware of it
+const mapDispatchToProps = (dispatch) =>{
+  return{
+    onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+    onRequestRobots: () => dispatch(requestRobots()) //requestRobots(dispatch)
+  }
+}
+
   class App extends Component{
 
-    constructor(){
-      super();
-      this.state={
-         robots:[],
-         searchfield: ''
-      } //state means what describes our app, usually lives in parent component
-       // console.log('constructor');
-    }//const
-
     componentDidMount(){
-     // console.log("check");
-     fetch('https://jsonplaceholder.typicode.com/users')
-     .then(response=>{
-      return response.json();
-     })
-     .then(users=>this.setState({robots:users}));
+
+     this.props.onRequestRobots();
+   
     }
 
-    onSearchChange=(event)=>{
-     //console.log(event);
-     //console.log(event.target.value);
-    this.setState({searchfield:event.target.value})
-
-    }//onsearchange
-
     render(){
-      const {robots, searchfield}=this.state;
-       const filteredRobots=robots.filter(robot=>{
-       return robot.name.toLowerCase().includes(searchfield.toLowerCase());
+      const {searchField, onSearchChange, robots, isPending, error } =this.props;
+      const filteredRobots=robots.filter(robot=>{
+       return robot.name.toLowerCase().includes(searchField.toLowerCase());
       })
-    
-          if(!robots.length){
-        return <h1>Loading</h1>
-       } else{
-         return(
-         <div className='tc'>
-          <h1 className='f2'>RoboFriends</h1>
-         <SearchBox searchChange={this.onSearchChange}/>
-         <Scroll>
-          <ErrorBoundry>
-            <CardList robots={filteredRobots} />
-          </ErrorBoundry>
-        </Scroll>
-        </div>
-     );}
+   
+            return isPending?
+              <h1>Loading</h1>:
+             (
+              <div className='tc'>
+               <h1 className='f2'>RoboFriends</h1>
+               <SearchBox searchChange={onSearchChange}/>
+               <Scroll>
+                 <ErrorBoundry catchError ={error} selectedRobots={filteredRobots}/>
+              </Scroll>
+             </div>
+            );
     
 }//render
 }//app
 
-export default App;
+//export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);
